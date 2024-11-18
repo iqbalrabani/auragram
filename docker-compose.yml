@@ -21,6 +21,7 @@ services:
     environment:
       - MONGODB_URI=mongodb://mongodb:27017/instagram-clone
       - JWT_SECRET=your_jwt_secret
+      - HOST=0.0.0.0
     networks:
       - app-network
 
