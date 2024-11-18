@@ -78,7 +78,7 @@ router.delete('/:id', auth, async (req, res) => {
     }
 
     // Delete the image file
-    const imagePath = path.join('uploads/posts/', post.image);
+    const imagePath = path.join(__dirname, '../../', post.image);
     if (fs.existsSync(imagePath)) {
       fs.unlinkSync(imagePath);
     }
