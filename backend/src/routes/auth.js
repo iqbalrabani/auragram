@@ -35,7 +35,8 @@ router.post('/register', upload.single('profilePhoto'), async (req, res) => {
       displayName,
       password: hashedPassword,
       bio,
-      profilePhoto: req.file ? req.file.filename : 'default-profile.jpg'
+      // profilePhoto: req.file ? req.file.filename : 'default-profile.jpg'
+      profilePhoto: req.file ? `/uploads/profiles/${req.file.filename}` : '/uploads/profiles/default-profile.jpg'
     });
 
     await user.save();

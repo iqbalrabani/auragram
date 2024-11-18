@@ -23,12 +23,13 @@ router.post('/', auth, upload.single('image'), async (req, res) => {
     const post = new Post({
       user: req.user.id,
       caption,
-      image: req.file.filename
+      image: `/uploads/posts/${req.file.filename}`
     });
 
     await post.save();
     await post.populate('user', '-password');
-    res.json(post);
+    
+    res.status(201).json(post);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -41,7 +42,7 @@ router.get('/', auth, async (req, res) => {
       .populate('user', '-password')
       .populate('commentCount')
       .sort('-createdAt');
-    res.json(posts);
+    res.status(200).json(posts);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -56,7 +57,7 @@ router.get('/:id', auth, async (req, res) => {
     if (!post) {
       return res.status(404).json({ error: 'Post not found' });
     }
-    res.json(post);
+    res.status(200).json(post);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -86,7 +87,7 @@ router.delete('/:id', auth, async (req, res) => {
     await Comment.deleteMany({ post: req.params.id });
 
     await post.deleteOne();
-    res.json({ message: 'Post deleted successfully' });
+    res.status(200).json({ message: 'Post deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
