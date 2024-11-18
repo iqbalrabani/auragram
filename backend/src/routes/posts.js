@@ -4,6 +4,7 @@ const Comment = require('../models/Comment');
 const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 
 const storage = multer.diskStorage({
   destination: 'uploads/posts/',
@@ -73,6 +74,12 @@ router.delete('/:id', auth, async (req, res) => {
     // Check if the user owns the post
     if (post.user.toString() !== req.user.id) {
       return res.status(403).json({ error: 'Not authorized to delete this post' });
+    }
+
+    // Delete the image file
+    const imagePath = path.join('uploads/posts/', post.image);
+    if (fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath);
     }
 
     // Delete all comments associated with the post
