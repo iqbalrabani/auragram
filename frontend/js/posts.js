@@ -84,4 +84,26 @@ function displayPosts(posts) {
 
     mainContent.innerHTML = html;
     posts.forEach(post => loadComments(post._id));
+}
+
+async function deletePost(postId) {
+    if (!confirm('Are you sure you want to delete this post?')) return;
+    
+    try {
+        const response = await fetch(`${API_URL}/posts/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error);
+        }
+        
+        loadPosts(); // Refresh the posts list
+    } catch (error) {
+        alert(error.message);
+    }
 } 

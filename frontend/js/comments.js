@@ -54,4 +54,28 @@ function displayComments(postId, comments) {
     `).join('');
 
     commentsContainer.innerHTML = html;
+}
+
+async function deleteComment(commentId) {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+    
+    try {
+        const response = await fetch(`${API_URL}/comments/${commentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error);
+        }
+        
+        // Refresh comments for the post
+        const postId = commentId.split('-')[0];
+        loadComments(postId);
+    } catch (error) {
+        alert(error.message);
+    }
 } 
