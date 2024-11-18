@@ -13,7 +13,7 @@ router.post('/:postId', auth, async (req, res) => {
 
     await comment.save();
     await comment.populate('user', '-password');
-    res.json(comment);
+    res.status(201).json(comment);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -25,7 +25,7 @@ router.get('/:postId', auth, async (req, res) => {
     const comments = await Comment.find({ post: req.params.postId })
       .populate('user', '-password')
       .sort('-createdAt');
-    res.json(comments);
+    res.status(200).json(comments);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -45,7 +45,7 @@ router.delete('/:commentId', auth, async (req, res) => {
     }
 
     await comment.deleteOne();
-    res.json({ message: 'Comment deleted successfully' });
+    res.status(200).json({ message: 'Comment deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

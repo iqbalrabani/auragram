@@ -42,7 +42,7 @@ router.post('/register', upload.single('profilePhoto'), async (req, res) => {
 
     // Create token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.json({ token, user: { ...user._doc, password: undefined } });
+    res.status(201).json({ token, user: { ...user._doc, password: undefined } });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -67,7 +67,7 @@ router.post('/login', async (req, res) => {
 
     // Create token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
-    res.json({ token, user: { ...user._doc, password: undefined } });
+    res.status(200).json({ token, user: { ...user._doc, password: undefined } });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

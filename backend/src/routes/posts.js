@@ -38,6 +38,7 @@ router.get('/', auth, async (req, res) => {
   try {
     const posts = await Post.find()
       .populate('user', '-password')
+      .populate('commentCount')
       .sort('-createdAt');
     res.json(posts);
   } catch (error) {
@@ -49,7 +50,8 @@ router.get('/', auth, async (req, res) => {
 router.get('/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
-      .populate('user', '-password');
+      .populate('user', '-password')
+      .populate('commentCount');
     if (!post) {
       return res.status(404).json({ error: 'Post not found' });
     }
