@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const Post = require('../models/Post');
+const Comment = require('../models/Comment');
 const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
@@ -53,6 +54,30 @@ router.get('/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
     res.json(post);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete post
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+    
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // Check if the user owns the post
+    if (post.user.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Not authorized to delete this post' });
+    }
+
+    // Delete all comments associated with the post
+    await Comment.deleteMany({ post: req.params.id });
+
+    await post.deleteOne();
+    res.json({ message: 'Post deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
