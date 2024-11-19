@@ -75,35 +75,81 @@ function PostDetail() {
   if (!post) return null;
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto' }}>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', p: 2 }}>
       <Card>
-        <Box sx={{ display: { sm: 'flex' } }}>
-          <CardMedia
-            component="img"
-            image={`http://localhost:5000${post.image}`}
-            alt={post.caption}
-            sx={{ 
-              width: { sm: '60%' },
-              height: { sm: 500 },
-              objectFit: 'cover'
-            }}
-          />
-          <Box sx={{ width: { sm: '40%' }, display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ 
+          display: { sm: 'flex' },
+          height: { sm: '90vh' },
+          maxHeight: { sm: 800 }
+        }}>
+          <Box sx={{ 
+            width: { sm: '65%' },
+            display: 'flex',
+            alignItems: 'center',
+            bgcolor: 'transparent',
+            position: 'relative',
+            p: 2
+          }}>
+            <CardMedia
+              component="img"
+              image={`http://localhost:5000${post.image}`}
+              alt={post.caption}
+              sx={{ 
+                width: '100%',
+                height: 'auto',
+                maxHeight: '100%',
+                objectFit: 'contain'
+              }}
+            />
+          </Box>
+          <Box sx={{ 
+            width: { sm: '35%' },
+            display: 'flex', 
+            flexDirection: 'column',
+            maxHeight: { sm: '100%' },
+            borderLeft: '1px solid',
+            borderColor: 'divider'
+          }}>
             <CardHeader
               avatar={
                 <Avatar src={`http://localhost:5000${post.user.profilePhoto}`} />
               }
               title={post.user.displayName}
               subheader={new Date(post.createdAt).toLocaleDateString()}
+              sx={{ px: 3, py: 2 }}
             />
             <Divider />
-            <CardContent>
-              <Typography variant="body2" color="text.secondary">
-                {post.caption}
-              </Typography>
+            <CardContent sx={{ px: 3, py: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
+                <Box sx={{ flexGrow: 1 }}>
+                  <Typography 
+                    variant="body1"
+                    sx={{ 
+                      fontSize: '1rem',
+                      fontWeight: 500,
+                      color: 'text.primary'
+                    }}
+                  >
+                    {post.caption}
+                  </Typography>
+                </Box>
+              </Box>
             </CardContent>
             <Divider />
-            <Box sx={{ p: 2, flexGrow: 1, overflowY: 'auto', maxHeight: 300 }}>
+            <Box sx={{ 
+              px: 3,
+              py: 2,
+              flexGrow: 1, 
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              <Typography 
+                variant="subtitle2" 
+                sx={{ mb: 2, color: 'text.secondary' }}
+              >
+                Comments
+              </Typography>
               {comments.map(comment => (
                 <Box key={comment._id} sx={{ mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
@@ -112,10 +158,17 @@ function PostDetail() {
                       sx={{ width: 32, height: 32, mr: 1 }}
                     />
                     <Box sx={{ flexGrow: 1 }}>
-                      <Typography variant="subtitle2">
+                      <Typography 
+                        variant="subtitle2" 
+                        sx={{ fontSize: '0.875rem' }}
+                      >
                         {comment.user.displayName}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography 
+                        variant="body2" 
+                        color="text.secondary"
+                        sx={{ fontSize: '0.875rem' }}
+                      >
                         {comment.content}
                       </Typography>
                     </Box>
@@ -131,7 +184,8 @@ function PostDetail() {
                 </Box>
               ))}
             </Box>
-            <Box sx={{ p: 2 }}>
+            <Divider />
+            <Box sx={{ p: 3 }}>
               <form onSubmit={handleAddComment}>
                 <TextField
                   fullWidth
@@ -158,4 +212,4 @@ function PostDetail() {
   );
 }
 
-export default PostDetail; 
+export default PostDetail;

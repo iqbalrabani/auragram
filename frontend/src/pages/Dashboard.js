@@ -61,9 +61,17 @@ function Dashboard() {
             onClick={() => navigate(`/posts/${post._id}`)}
           />
           <CardContent>
-            <Typography variant="body2" color="text.secondary">
-              {post.caption}
-            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
+              <Typography 
+                variant="body1"
+                sx={{ 
+                  fontSize: '1rem',
+                  fontWeight: 500
+                }}
+              >
+                {post.caption}
+              </Typography>
+            </Box>
             <Box sx={{ mt: 1, display: 'flex', alignItems: 'center' }}>
               <ChatBubbleOutline sx={{ mr: 1, fontSize: 20 }} />
               <Typography variant="body2" color="text.secondary">
