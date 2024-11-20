@@ -5,6 +5,15 @@ const auth = require('../middleware/auth');
 // Add comment
 router.post('/:postId', auth, async (req, res) => {
   try {
+    // DANGEROUS: Directly accepting and storing raw HTML/JavaScript
+    let content = req.body.content;
+    
+    // DANGEROUS: Allow script tags to be executed
+    if (!content.includes('<script>')) {
+      // If no script tag, wrap content in a div to ensure HTML rendering
+      content = `<div>${content}</div>`;
+    }
+    
     const comment = new Comment({
       post: req.params.postId,
       user: req.user.id,
@@ -40,9 +49,9 @@ router.delete('/:commentId', auth, async (req, res) => {
     }
 
     // Check if the user owns the comment
-    if (comment.user.toString() !== req.user.id) {
-      return res.status(403).json({ error: 'Not authorized to delete this comment' });
-    }
+    // if (comment.user.toString() !== req.user.id) {
+    //   return res.status(403).json({ error: 'Not authorized to delete this comment' });
+    // }
 
     await comment.deleteOne();
     res.status(200).json({ message: 'Comment deleted successfully' });

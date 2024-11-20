@@ -64,6 +64,8 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 // Delete post
+
+//auth in param (sec code)
 router.delete('/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -72,10 +74,14 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    // Check if the user owns the post
-    if (post.user.toString() !== req.user.id) {
-      return res.status(403).json({ error: 'Not authorized to delete this post' });
-    }
+
+    // Identification and Authentication Failures - All users can delete any post
+
+    
+    // // Check if the user owns the post
+    // if (post.user.toString() !== req.user.id) {
+    //   return res.status(403).json({ error: 'Not authorized to delete this post' });
+    // }
 
     // Delete the image file
     const imagePath = path.join(__dirname, '../../', post.image);

@@ -169,17 +169,23 @@ function PostDetail() {
                         color="text.secondary"
                         sx={{ fontSize: '0.875rem' }}
                       >
-                        {comment.content}
+                
+                          <div 
+                          dangerouslySetInnerHTML={{ 
+                            __html: comment.content 
+                          }}
+                          />
+                      
                       </Typography>
                     </Box>
-                    {comment.user._id === user._id && (
+                    {
                       <IconButton 
                         size="small" 
                         onClick={() => handleDeleteComment(comment._id)}
                       >
                         <Delete fontSize="small" />
                       </IconButton>
-                    )}
+                    }
                   </Box>
                 </Box>
               ))}

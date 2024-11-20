@@ -44,11 +44,9 @@ function Dashboard() {
               <Avatar src={`http://localhost:5000${post.user.profilePhoto}`} />
             }
             action={
-              post.user._id === user._id && (
-                <IconButton onClick={() => handleDelete(post._id)}>
-                  <Delete />
-                </IconButton>
-              )
+              <IconButton onClick={() => handleDelete(post._id)}>
+                <Delete />
+              </IconButton>  
             }
             title={post.user.displayName}
             subheader={new Date(post.createdAt).toLocaleDateString()}

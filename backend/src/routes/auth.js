@@ -42,12 +42,17 @@ router.post('/register', upload.single('profilePhoto'), async (req, res) => {
     await user.save();
 
     // Create token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id }, 'hardcoded-secret');
     res.status(201).json({ token, user: { ...user._doc, password: undefined } });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
+
+
+// Insecure Design - No login attempts limit
+
 
 // Login
 router.post('/login', async (req, res) => {
@@ -55,7 +60,7 @@ router.post('/login', async (req, res) => {
     const { username, password } = req.body;
     
     // Find user
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ $where: `this.username == '${username}'` });
     if (!user) {
       return res.status(400).json({ error: 'User not found' });
     }
@@ -67,7 +72,7 @@ router.post('/login', async (req, res) => {
     }
 
     // Create token
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id }, 'hardcoded-secret');
     res.status(200).json({ token, user: { ...user._doc, password: undefined } });
   } catch (error) {
     res.status(500).json({ error: error.message });
