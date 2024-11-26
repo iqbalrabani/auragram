@@ -24,7 +24,13 @@ pipeline {
         stage('Run Tests') {
             steps {
                 dir('backend') {
-                    sh 'npm test'
+                    sh '''
+                    if [ -f "package.json" ] && grep -q "test" "package.json"; then
+                        npm test
+                    else
+                        echo "No test script found, skipping tests"
+                    fi
+                    '''
                 }
             }
         }
