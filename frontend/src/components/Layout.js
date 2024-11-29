@@ -3,12 +3,18 @@ import { Home, AddBox, Logout } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import CreatePostModal from './CreatePostModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import config from '../config';
 
 function Layout({ children }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(user);
+
+  useEffect(() => {
+    setCurrentUser(user);
+  }, [user]);
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -32,8 +38,9 @@ function Layout({ children }) {
             <Logout />
           </IconButton>
           <Avatar 
-            src={`http://localhost:5000${user?.profilePhoto}`}
-            sx={{ width: 32, height: 32, ml: 1 }}
+            src={currentUser?.profilePhoto}
+            sx={{ width: 32, height: 32, ml: 1, cursor: 'pointer' }}
+            onClick={() => navigate(`/profile/${currentUser.username}`)}
           />
         </Toolbar>
       </AppBar>

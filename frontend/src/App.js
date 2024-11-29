@@ -3,6 +3,7 @@ import { ThemeProvider, CssBaseline, CircularProgress, Box } from '@mui/material
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import theme from './theme';
 
+import Profile from './pages/Profile';
 import Layout from './components/Layout';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -90,6 +91,16 @@ function App() {
                 <PrivateRoute>
                   <Layout>
                     <PostDetail />
+                  </Layout>
+                </PrivateRoute>
+              } 
+            />
+            <Route 
+              path="/profile/:username" 
+              element={
+                <PrivateRoute>
+                  <Layout>
+                    <Profile />
                   </Layout>
                 </PrivateRoute>
               } 

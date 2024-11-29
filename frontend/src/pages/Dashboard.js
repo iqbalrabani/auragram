@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Box, Card, CardHeader, CardMedia, CardContent, Typography, IconButton, Avatar } from '@mui/material';
-import { Delete, ChatBubbleOutline } from '@mui/icons-material';
+import { Delete, ChatBubbleOutline, Edit } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import config from '../config';
+import EditPostModal from '../components/EditPostModal';
 
 function Dashboard() {
   const [posts, setPosts] = useState([]);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -16,7 +20,7 @@ function Dashboard() {
 
   const fetchPosts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/posts');
+      const response = await axios.get(`${config.API_URL}/api/posts`);
       setPosts(response.data);
     } catch (error) {
       console.error('Error fetching posts:', error);
@@ -27,11 +31,31 @@ function Dashboard() {
     if (!window.confirm('Are you sure you want to delete this post?')) return;
     
     try {
-      await axios.delete(`http://localhost:5000/api/posts/${postId}`);
+      // Get the post data first to get the image URL
+      const post = posts.find(p => p._id === postId);
+      if (!post) return;
+
+      // Delete the post from the backend (which will also delete from Cloud Storage)
+      await axios.delete(`${config.API_URL}/api/posts/${postId}`);
+      
+      // Update local state
       setPosts(posts.filter(post => post._id !== postId));
     } catch (error) {
       console.error('Error deleting post:', error);
       alert('Failed to delete post');
+    }
+  };
+
+  const handleEditClick = (post) => {
+    setSelectedPost(post);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditComplete = (success) => {
+    setIsEditModalOpen(false);
+    setSelectedPost(null);
+    if (success) {
+      fetchPosts(); // Refresh posts after edit
     }
   };
 
@@ -41,21 +65,26 @@ function Dashboard() {
         <Card key={post._id} sx={{ mb: 2 }}>
           <CardHeader
             avatar={
-              <Avatar src={`http://localhost:5000${post.user.profilePhoto}`} />
+              <Avatar src={post.user.profilePhoto} />
             }
             action={
               post.user._id === user._id && (
-                <IconButton onClick={() => handleDelete(post._id)}>
-                  <Delete />
-                </IconButton>
+                <Box>
+                  <IconButton onClick={() => handleEditClick(post)}>
+                    <Edit />
+                  </IconButton>
+                  <IconButton onClick={() => handleDelete(post._id)}>
+                    <Delete />
+                  </IconButton>
+                </Box>
               )
             }
-            title={post.user.displayName}
+            title={post.user._id === user._id ? post.user.displayName + " (You)" : post.user.displayName}
             subheader={new Date(post.createdAt).toLocaleDateString()}
           />
           <CardMedia
             component="img"
-            image={`http://localhost:5000${post.image}`}
+            image={post.image}
             alt={post.caption}
             sx={{ cursor: 'pointer' }}
             onClick={() => navigate(`/posts/${post._id}`)}
@@ -81,6 +110,12 @@ function Dashboard() {
           </CardContent>
         </Card>
       ))}
+
+      <EditPostModal
+        open={isEditModalOpen}
+        onClose={handleEditComplete}
+        post={selectedPost}
+      />
     </Box>
   );
 }

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
+const userRoutes = require('./routes/users');
 
 const app = express();
 
@@ -33,6 +34,7 @@ const upload = multer({ storage });
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/posts', require('./routes/posts'));
 app.use('/api/comments', require('./routes/comments'));
+app.use('/api/users', userRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {

@@ -16,6 +16,7 @@ import {
 import { Delete } from '@mui/icons-material';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
+import config from '../config';
 
 function PostDetail() {
   const { id } = useParams();
@@ -31,7 +32,7 @@ function PostDetail() {
 
   const fetchPost = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/posts/${id}`);
+      const response = await axios.get(`${config.API_URL}/api/posts/${id}`);
       setPost(response.data);
     } catch (error) {
       console.error('Error fetching post:', error);
@@ -40,7 +41,7 @@ function PostDetail() {
 
   const fetchComments = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/comments/${id}`);
+      const response = await axios.get(`${config.API_URL}/api/comments/${id}`);
       setComments(response.data);
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -50,7 +51,7 @@ function PostDetail() {
   const handleAddComment = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`http://localhost:5000/api/comments/${id}`, {
+      const response = await axios.post(`${config.API_URL}/api/comments/${id}`, {
         content: newComment
       });
       setComments([response.data, ...comments]);
@@ -64,7 +65,7 @@ function PostDetail() {
     if (!window.confirm('Are you sure you want to delete this comment?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/comments/${commentId}`);
+      await axios.delete(`${config.API_URL}/api/comments/${commentId}`);
       setComments(comments.filter(comment => comment._id !== commentId));
     } catch (error) {
       console.error('Error deleting comment:', error);
@@ -92,7 +93,7 @@ function PostDetail() {
           }}>
             <CardMedia
               component="img"
-              image={`http://localhost:5000${post.image}`}
+              image={post.image}
               alt={post.caption}
               sx={{ 
                 width: '100%',
@@ -112,9 +113,9 @@ function PostDetail() {
           }}>
             <CardHeader
               avatar={
-                <Avatar src={`http://localhost:5000${post.user.profilePhoto}`} />
+                <Avatar src={post.user.profilePhoto} />
               }
-              title={post.user.displayName}
+              title={post.user._id === user._id ? post.user.displayName + " (You)" : post.user.displayName}
               subheader={new Date(post.createdAt).toLocaleDateString()}
               sx={{ px: 3, py: 2 }}
             />
@@ -154,7 +155,7 @@ function PostDetail() {
                 <Box key={comment._id} sx={{ mb: 2 }}>
                   <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
                     <Avatar
-                      src={`http://localhost:5000${comment.user.profilePhoto}`}
+                      src={comment.user.profilePhoto}
                       sx={{ width: 32, height: 32, mr: 1 }}
                     />
                     <Box sx={{ flexGrow: 1 }}>
@@ -162,7 +163,7 @@ function PostDetail() {
                         variant="subtitle2" 
                         sx={{ fontSize: '0.875rem' }}
                       >
-                        {comment.user.displayName}
+                        {comment.user._id === user._id ? comment.user.displayName + " (You)" : comment.user.displayName}
                       </Typography>
                       <Typography 
                         variant="body2" 

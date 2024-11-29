@@ -5,32 +5,62 @@ const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
-
-const storage = multer.diskStorage({
-  destination: 'uploads/posts/',
-  filename: (req, file, cb) => {
-    cb(null, `post-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
-
-const upload = multer({ storage });
+const { bucket, getPublicUrl } = require('../config/storage');
+const uploadMiddleware = require('../middleware/upload');
 
 // Create post
-router.post('/', auth, upload.single('image'), async (req, res) => {
+router.post('/', auth, uploadMiddleware, async (req, res) => {
   try {
     const { caption } = req.body;
     
-    const post = new Post({
-      user: req.user.id,
-      caption,
-      image: `/uploads/posts/${req.file.filename}`
+    if (!req.file) {
+      return res.status(400).json({ error: 'Image is required' });
+    }
+
+    // Upload to Cloud Storage
+    const originalExtension = path.extname(req.file.originalname);
+    const blobName = `posts/${Date.now()}${originalExtension}`;
+    const blob = bucket.file(blobName);
+    const blobStream = blob.createWriteStream({
+      metadata: {
+        contentType: req.file.mimetype
+      }
     });
 
-    await post.save();
-    await post.populate('user', '-password');
-    
-    res.status(201).json(post);
+    blobStream.on('error', (err) => {
+      console.error('Upload error:', err);
+      res.status(500).json({ error: 'Unable to upload image' });
+    });
+
+    blobStream.on('finish', async () => {
+      try {
+        // Make the file public
+        await blob.makePublic();
+        
+        // Get the public URL
+        const publicUrl = getPublicUrl(blobName);
+        
+        // Create post with Cloud Storage URL
+        const post = new Post({
+          user: req.user.id,
+          image: publicUrl,
+          caption
+        });
+
+        const savedPost = await post.save();
+        await savedPost.populate('user', '-password');
+        
+        console.log('Saved post:', savedPost); // Add this for debugging
+        res.status(201).json(savedPost);
+      } catch (error) {
+        console.error('Database error:', error);
+        res.status(500).json({ error: 'Failed to save post' });
+      }
+    });
+
+    blobStream.end(req.file.buffer);
   } catch (error) {
+    console.error('Route error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -77,10 +107,15 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(403).json({ error: 'Not authorized to delete this post' });
     }
 
-    // Delete the image file
-    const imagePath = path.join(__dirname, '../../', post.image);
-    if (fs.existsSync(imagePath)) {
-      fs.unlinkSync(imagePath);
+    // Delete image from Cloud Storage if it exists
+    if (post.image && post.image.includes('storage.googleapis.com')) {
+      try {
+        const fileName = post.image.split('/').pop();
+        await bucket.file(`posts/${fileName}`).delete();
+      } catch (error) {
+        console.error('Error deleting from cloud storage:', error);
+        // Continue with post deletion even if cloud storage deletion fails
+      }
     }
 
     // Delete all comments associated with the post
@@ -90,6 +125,33 @@ router.delete('/:id', auth, async (req, res) => {
     res.status(200).json({ message: 'Post deleted successfully' });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Edit post
+router.put('/:id', auth, async (req, res) => {
+  try {
+    const { caption } = req.body;
+    const post = await Post.findById(req.params.id);
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // Check if the user is the owner of the post
+    if (post.user.toString() !== req.user.id) {
+      return res.status(403).json({ error: 'Not authorized to edit this post' });
+    }
+
+    post.caption = caption;
+    await post.save();
+
+    // Populate user info before sending response
+    await post.populate('user', '-password');
+    res.json(post);
+  } catch (error) {
+    console.error('Edit post error:', error);
+    res.status(500).json({ error: 'Failed to update post' });
   }
 });
 

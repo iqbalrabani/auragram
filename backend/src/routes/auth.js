@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const multer = require('multer');
 const path = require('path');
+const { bucket, getPublicUrl } = require('../config/storage');
 
 const storage = multer.diskStorage({
   destination: 'uploads/profiles/',
@@ -12,7 +13,12 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
+});
 
 // Register
 router.post('/register', upload.single('profilePhoto'), async (req, res) => {
@@ -29,19 +35,32 @@ router.post('/register', upload.single('profilePhoto'), async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create new user
+    let profilePhotoUrl = getPublicUrl('profiles/default-profile.jpg');
+
+    if (req.file) {
+      const blob = bucket.file(`profiles/${Date.now()}-${req.file.originalname}`);
+      const blobStream = blob.createWriteStream();
+
+      await new Promise((resolve, reject) => {
+        blobStream.on('error', reject);
+        blobStream.on('finish', async () => {
+          await blob.makePublic();
+          profilePhotoUrl = getPublicUrl(blob.name);
+          resolve();
+        });
+        blobStream.end(req.file.buffer);
+      });
+    }
+
     const user = new User({
       username,
       displayName,
       password: hashedPassword,
       bio,
-      // profilePhoto: req.file ? req.file.filename : 'default-profile.jpg'
-      profilePhoto: req.file ? `/uploads/profiles/${req.file.filename}` : '/uploads/profiles/default-profile.jpg'
+      profilePhoto: profilePhotoUrl
     });
 
     await user.save();
-
-    // Create token
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     res.status(201).json({ token, user: { ...user._doc, password: undefined } });
   } catch (error) {
