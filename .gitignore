@@ -1,7 +1,0 @@
-uploads/
-backend/node_modules
-backend/.env
-backend/config/gcloud-key.json
-frontend/node_modules
-frontend/.env
-frontend/build
