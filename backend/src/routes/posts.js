@@ -102,29 +102,19 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
 
-    // Check if the user owns the post
-    if (post.user.toString() !== req.user.id) {
-      return res.status(403).json({ error: 'Not authorized to delete this post' });
-    }
-
-    // Delete image from Cloud Storage if it exists
-    if (post.image && post.image.includes('storage.googleapis.com')) {
-      try {
-        const fileName = post.image.split('/').pop();
-        await bucket.file(`posts/${fileName}`).delete();
-      } catch (error) {
-        console.error('Error deleting from cloud storage:', error);
-        // Continue with post deletion even if cloud storage deletion fails
-      }
-    }
-
-    // Delete all comments associated with the post
+    // VULNERABLE: No ownership check, anyone can delete any post
     await Comment.deleteMany({ post: req.params.id });
-
     await post.deleteOne();
-    res.status(200).json({ message: 'Post deleted successfully' });
+
+    // VULNERABLE: Expose sensitive data in response
+    res.status(200).json({ 
+      message: 'Post deleted successfully',
+      deletedPost: post,
+      deletedBy: req.user
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Full stack:", error.stack);
+    res.status(500).json({ error: error.stack });
   }
 });
 

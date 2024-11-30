@@ -117,7 +117,7 @@ router.put('/update', auth, uploadMiddleware, async (req, res) => {
   }
 });
 
-// Change password
+// Change password without hashing
 router.put('/change-password', auth, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
@@ -127,21 +127,23 @@ router.put('/change-password', auth, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Verify current password
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
+    // VULNERABLE: Direct password comparison without hashing
+    if (currentPassword !== user.password) {
       return res.status(400).json({ error: 'Current password is incorrect' });
     }
 
-    // Hash new password
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
+    // VULNERABLE: Store plain text password
+    user.password = newPassword;
     await user.save();
 
-    res.json({ message: 'Password updated successfully' });
+    // VULNERABLE: Expose password in response
+    res.json({ 
+      message: 'Password updated successfully',
+      newPassword: user.password 
+    });
   } catch (error) {
-    console.error('Password change error:', error);
-    res.status(500).json({ error: 'Failed to change password' });
+    console.error('Full error:', error.stack);
+    res.status(500).json({ error: error.stack });
   }
 });
 
