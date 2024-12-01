@@ -8,22 +8,21 @@ pipeline {
         SONNAR_SCANNER = 'SonarQube'
         SONAR_PROJECT_KEY = 'auragram'
         SONAR_PROJECT_NAME = 'auragram'
+        SONAR_HOST_URL = 'http://35.208.65.107:9000/'
     }
     
     stages {
-        stage('Run Sonarqube') {
-            environment {
-                scannerHome = tool "${SONNAR_SCANNER}";
-            }
+        stage('SonarQube Analysis') {
             steps {
-              withSonarQubeEnv("${SONNAR_SCANNER}") {
-                sh '''${SONNAR_SCANNER}/bin/sonar-scanner
-                -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                -Dsonar.projectName=${SONAR_PROJECT_NAME} \
-                -Dsonar.sources=. \
-                echo 'SonarQube Analysis Completed'
-                '''
-              }
+                withSonarQubeEnv('SonarQube') {
+                    sh '''
+                        sonar-scanner \
+                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=${SONAR_HOST_URL}
+                            echo 'SonarQube Analysis Completed'
+                    '''
+                }
             }
         }
         
