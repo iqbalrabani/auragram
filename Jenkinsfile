@@ -13,14 +13,14 @@ pipeline {
             parallel {
                 stage('Backend') {
                     steps {
-                        dir('auragram/backend') {
+                        dir('backend') {
                             sh 'npm install'
                         }
                     }
                 }
                 stage('Frontend') {
                     steps {
-                        dir('auragram/frontend') {
+                        dir('frontend') {
                             sh 'npm install'
                         }
                     }
@@ -32,7 +32,7 @@ pipeline {
             parallel {
                 stage('Backend Tests') {
                     steps {
-                        dir('auragram/backend') {
+                        dir('backend') {
                             // Run tests with coverage
                             sh 'npm test -- --coverage'
                         }
@@ -40,7 +40,7 @@ pipeline {
                 }
                 stage('Frontend Tests') {
                     steps {
-                        dir('auragram/frontend') {
+                        dir('frontend') {
                             // Run tests with coverage
                             sh 'npm test -- --coverage --watchAll=false'
                         }
