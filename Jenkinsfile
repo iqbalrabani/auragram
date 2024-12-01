@@ -18,8 +18,8 @@ pipeline {
                             ${SCANNER_HOME}/bin/sonar-scanner \
                             -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                             -Dsonar.sources=. \
-                            echo 'SonarQube Analysis Completed'
                         """
+                        echo 'SonarQube Analysis Completed'
                     }
                 }
             }
