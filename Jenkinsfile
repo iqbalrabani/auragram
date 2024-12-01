@@ -7,8 +7,6 @@ pipeline {
         GCP_CREDENTIALS = 'gcp-service-account-key'
         SONNAR_SCANNER = 'SonarQube'
         SONAR_PROJECT_KEY = 'auragram'
-        SONAR_PROJECT_NAME = 'auragram'
-        SONAR_HOST_URL = 'http://35.208.65.107:9000/'
     }
     
     stages {
@@ -16,14 +14,14 @@ pipeline {
             steps {
                 script {
                     def scannerHome = tool 'SonarQube Scanner'
-                    withSonarQubeEnv('SonarQube') {
+                    withSonarQubeEnv("${SONAR_SCANNER}") {
                         sh """
                             ${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=${SONAR_HOST_URL}
+                            -Dsonar.sources=.
                         """
                     }
+                    echo 'SonarQube Analysis Completed'
                 }
             }
         }
@@ -36,8 +34,8 @@ pipeline {
                         gcloud auth configure-docker gcr.io -q
                         
                         # Build and Deploy Backend
-                        gcloud run deploy auragram-backend \
-                            --source auragram/backend \
+                        gcloud run deploy visiongram-backend \
+                            --source backend \
                             --platform managed \
                             --region ${REGION} \
                             --project ${PROJECT_ID} \
@@ -45,8 +43,8 @@ pipeline {
                             --set-env-vars="NODE_ENV=production"
                         
                         # Build and Deploy Frontend
-                        gcloud run deploy auragram-frontend \
-                            --source auragram/frontend \
+                        gcloud run deploy visiongram-frontend \
+                            --source frontend \
                             --platform managed \
                             --region ${REGION} \
                             --project ${PROJECT_ID} \
