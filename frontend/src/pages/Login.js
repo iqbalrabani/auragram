@@ -23,6 +23,7 @@ function Login() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -30,6 +31,7 @@ function Login() {
     e.preventDefault();
     setError('');
     setIsLoading(true);
+    setIsLocked(false);
 
     if (!username || !password) {
       setError('Please fill in all fields');
@@ -38,7 +40,6 @@ function Login() {
     }
 
     try {
-      console.log(config.API_URL);
       const response = await axios.post(`${config.API_URL}/api/auth/login`, {
         username,
         password
@@ -47,14 +48,11 @@ function Login() {
       login(response.data.token, response.data.user);
       navigate('/');
     } catch (error) {
-      console.log('Full error:', error);
-      console.log('Response data:', error.response?.data);
       let errorMessage = 'An error occurred during login';
       
-      if (error.response?.status === 401) {
-        errorMessage = 'Invalid username or password';
-      } else if (error.response?.status === 404) {
-        errorMessage = 'User not found';
+      if (error.response?.status === 423) {
+        setIsLocked(true);
+        errorMessage = error.response.data.error;
       } else if (error.response?.data?.error) {
         errorMessage = error.response.data.error;
       }
@@ -81,7 +79,10 @@ function Login() {
         <Card sx={{ p: 4, width: '100%' }}>
           <Box component="form" onSubmit={handleSubmit}>
             {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert 
+                severity={isLocked ? "warning" : "error"} 
+                sx={{ mb: 2 }}
+              >
                 {error}
               </Alert>
             )}

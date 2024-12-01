@@ -5,6 +5,7 @@ const User = require('../models/User');
 const multer = require('multer');
 const path = require('path');
 const { bucket, getPublicUrl } = require('../config/storage');
+const rateLimiter = require('../services/rateLimiter');
 
 const storage = multer.diskStorage({
   destination: 'uploads/profiles/',
@@ -72,20 +73,43 @@ router.post('/register', upload.single('profilePhoto'), async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
+    const ip = req.ip;
+
+    // Check if the IP is locked
+    if (rateLimiter.isLocked(ip)) {
+      const timeLeft = rateLimiter.getLockTimeRemaining(ip);
+      return res.status(423).json({
+        error: `Too many failed attempts from your IP. Please try again in ${timeLeft} minutes.`
+      });
+    }
     
     // Find user
     const user = await User.findOne({ username });
     if (!user) {
-      return res.status(400).json({ error: 'User not found' });
+      // Don't increment counter for non-existent users to prevent user enumeration
+      return res.status(400).json({ error: 'Invalid username or password' });
     }
 
     // Verify password
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      return res.status(400).json({ error: 'Invalid password' });
+      const attemptsLeft = rateLimiter.recordFailedAttempt(ip);
+      
+      if (attemptsLeft <= 0) {
+        return res.status(423).json({
+          error: 'Too many failed attempts. Your IP has been temporarily blocked.'
+        });
+      }
+
+      return res.status(400).json({
+        error: `Invalid password. ${attemptsLeft} attempts remaining before temporary IP block.`
+      });
     }
 
-    // Create token
+    // Reset attempts on successful login
+    rateLimiter.resetAttempts(ip);
+
+    // Create token and complete login
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     res.status(200).json({ token, user: { ...user._doc, password: undefined } });
   } catch (error) {
