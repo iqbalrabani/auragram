@@ -16,12 +16,14 @@ pipeline {
             steps {
                 script {
                     def scannerHome = tool 'SonarQube Scanner'
-                }
-                withSonarQubeEnv('SonarQube') {
-                    "${scannerHome}/bin/sonar-scanner 
-                    -Dsonar.projectKey=${SONAR_PROJECT_KEY} 
-                    -Dsonar.sources=. 
-                    -Dsonar.host.url=${SONAR_HOST_URL}"
+                    withSonarQubeEnv('SonarQube') {
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=${SONAR_HOST_URL}
+                        """
+                    }
                 }
             }
         }
