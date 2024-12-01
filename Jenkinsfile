@@ -2,9 +2,9 @@ pipeline {
     agent any
     
     environment {
-        PROJECT_ID = 'devsecops-kel4'
+        GCP_PROJECT_ID = 'devsecops-kel4'
         REGION = 'us-central1'
-        GCP_KEY = 'gcp-service-account-key'
+        GCP_CREDENTIALS = 'gcp-service-account-key'
         SONAR_PROJECT_KEY = 'auragram'
     }
     
@@ -17,7 +17,7 @@ pipeline {
                         sh """
                             ${SCANNER_HOME}/bin/sonar-scanner \
                             -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                            -Dsonar.sources=. \
+                            -Dsonar.sources=.
                         """
                         echo 'SonarQube Analysis Completed'
                     }
@@ -28,9 +28,11 @@ pipeline {
         stage('Deploy to Cloud Run') {
             steps {
                 withCredentials([
-                    file(credentialsId: "${GCP_KEY}", variable: 'GCP_KEY'),
+                    file(credentialsId: "${GCP_CREDENTIALS}", variable: 'GCP_KEY'),
                     string(credentialsId: 'MONGODB_URI', variable: 'MONGODB_URI'),
-                    string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET')
+                    string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET'),
+                    string(credentialsId: 'GCP_BUCKET', variable: 'GCP_BUCKET'),
+                    string(credentialsId: 'GCP_SERVICE_ACCOUNT', variable: 'GCP_SERVICE_ACCOUNT')
                 ]) {
                     sh """
                         gcloud auth activate-service-account --key-file=$GCP_KEY
@@ -41,9 +43,10 @@ pipeline {
                             --source backend \
                             --platform managed \
                             --region ${REGION} \
-                            --project ${PROJECT_ID} \
+                            --project ${GCP_PROJECT_ID} \
                             --allow-unauthenticated \
-                            --set-env-vars="MONGODB_URI=${MONGODB_URI},JWT_SECRET=${JWT_SECRET}" \
+                            --set-env-vars="MONGODB_URI=${MONGODB_URI},JWT_SECRET=${JWT_SECRET},GCP_PROJECT_ID=${GCP_PROJECT_ID},GCP_BUCKET=${GCP_BUCKET}" \
+                            --service-account=${GCP_SERVICE_ACCOUNT} \
                             --port=8080
                         
                         # Build and Deploy Frontend
@@ -51,7 +54,7 @@ pipeline {
                             --source frontend \
                             --platform managed \
                             --region ${REGION} \
-                            --project ${PROJECT_ID} \
+                            --project ${GCP_PROJECT_ID} \
                             --allow-unauthenticated
                     """
                 }
