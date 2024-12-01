@@ -14,14 +14,14 @@ pipeline {
     stages {
         stage('SonarQube Analysis') {
             steps {
+                script {
+                    def scannerHome = tool 'SonarQube Scanner'
+                }
                 withSonarQubeEnv('SonarQube') {
-                    sh '''
-                        sonar-scanner \
-                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                            -Dsonar.sources=. \
-                            -Dsonar.host.url=${SONAR_HOST_URL}
-                            echo 'SonarQube Analysis Completed'
-                    '''
+                    "${scannerHome}/bin/sonar-scanner 
+                    -Dsonar.projectKey=${SONAR_PROJECT_KEY} 
+                    -Dsonar.sources=. 
+                    -Dsonar.host.url=${SONAR_HOST_URL}"
                 }
             }
         }
