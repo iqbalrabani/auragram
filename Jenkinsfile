@@ -6,19 +6,25 @@ pipeline {
         REGION = 'us-central1'
         GCP_CREDENTIALS = 'gcp-service-account-key'
         SONAR_PROJECT_KEY = 'auragram'
+        SONNAR_SCANNER = 'SonarQube'
+        SONAR_PROJECT_NAME = 'auragram'
+        SONAR_PROJECT_KEY = 'auragram'
     }
     
     stages {
-        stage('SonarQube Analysis') {
+        stage('Run Sonarqube') {
+            environment {
+                scannerHome = tool "${SONNAR_SCANNER}";
+            }
             steps {
-                withSonarQubeEnv('SonarQube') {
-                    sh """
-                        sonar-scanner \
-                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                            -Dsonar.sources=. \
-                            -Dsonar.javascript.lcov.reportPaths=auragram/backend/coverage/lcov.info,auragram/frontend/coverage/lcov.info
-                    """
-                }
+              withSonarQubeEnv("${SONNAR_SCANNER}") {
+                sh '''${SONNAR_SCANNER}/bin/sonar-scanner
+                -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                -Dsonar.projectName=${SONAR_PROJECT_NAME} \
+                -Dsonar.sources=. \
+                echo 'SonarQube Analysis Completed'
+                '''
+              }
             }
         }
         
