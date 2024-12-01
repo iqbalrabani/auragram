@@ -7,15 +7,17 @@ pipeline {
         GCP_CREDENTIALS = 'gcp-service-account-key'
         SONAR_PROJECT_KEY = 'auragram'
     }
-
-    
     
     stages {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    bat '''mvn clean verify sonar:sonar -Dsonar.projectKey=auragram -Dsonar.projectName='auragram' -Dsonar.host.url=http://35.208.65.107:9000/'''
-                    echo 'SonarQube Analysis Completed'
+                    sh """
+                        sonar-scanner \
+                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                            -Dsonar.sources=. \
+                            -Dsonar.javascript.lcov.reportPaths=auragram/backend/coverage/lcov.info,auragram/frontend/coverage/lcov.info
+                    """
                 }
             }
         }
