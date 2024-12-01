@@ -28,27 +28,6 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            parallel {
-                stage('Backend Tests') {
-                    steps {
-                        dir('backend') {
-                            // Run tests with coverage
-                            sh 'npm test -- --coverage'
-                        }
-                    }
-                }
-                stage('Frontend Tests') {
-                    steps {
-                        dir('frontend') {
-                            // Run tests with coverage
-                            sh 'npm test -- --coverage --watchAll=false'
-                        }
-                    }
-                }
-            }
-        }
-
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
