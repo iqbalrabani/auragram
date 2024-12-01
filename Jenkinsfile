@@ -5,7 +5,6 @@ pipeline {
         PROJECT_ID = 'devsecops-kel4'
         REGION = 'us-central1'
         GCP_CREDENTIALS = 'gcp-service-account-key'
-        SONNAR_SCANNER = 'SonarQube'
         SONAR_PROJECT_KEY = 'auragram'
     }
     
@@ -13,15 +12,15 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 script {
-                    def scannerHome = tool 'SonarQube Scanner'
-                    withSonarQubeEnv("${SONAR_SCANNER}") {
+                    def SCANNER_HOME = tool 'SonarQube Scanner'
+                    withSonarQubeEnv('SonarQube') {
                         sh """
-                            ${scannerHome}/bin/sonar-scanner \
+                            ${SCANNER_HOME}/bin/sonar-scanner \
                             -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
                             -Dsonar.sources=.
+                            echo 'SonarQube Analysis Completed'
                         """
                     }
-                    echo 'SonarQube Analysis Completed'
                 }
             }
         }
@@ -34,13 +33,12 @@ pipeline {
                         gcloud auth configure-docker gcr.io -q
                         
                         # Build and Deploy Backend
-                        gcloud run deploy visiongram-backend \
+                        gcloud run deploy  visiongram-backend \
                             --source backend \
                             --platform managed \
                             --region ${REGION} \
                             --project ${PROJECT_ID} \
-                            --allow-unauthenticated \
-                            --set-env-vars="NODE_ENV=production"
+                            --allow-unauthenticated
                         
                         # Build and Deploy Frontend
                         gcloud run deploy visiongram-frontend \
