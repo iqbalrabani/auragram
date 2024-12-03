@@ -39,7 +39,7 @@ pipeline {
                         gcloud auth configure-docker gcr.io -q
                         
                         # Build and Deploy Backend
-                        gcloud run deploy visiongram-backend \
+                        gcloud run deploy auragram-backend \
                             --source backend \
                             --platform managed \
                             --region ${REGION} \
@@ -50,7 +50,7 @@ pipeline {
                             --port=8080
                         
                         # Build and Deploy Frontend
-                        gcloud run deploy visiongram-frontend \
+                        gcloud run deploy auragram \
                             --source frontend \
                             --platform managed \
                             --region ${REGION} \
