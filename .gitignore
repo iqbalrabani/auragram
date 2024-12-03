@@ -1,0 +1,6 @@
+backend/node_modules
+frontend/node_modules
+uploads/
+frontend/.env
+backend/.env
+backend/config/gcloud-key.json
