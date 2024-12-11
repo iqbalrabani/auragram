@@ -12,7 +12,6 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import axios from 'axios';
 import config from '../config';
-import { validatePassword } from '../utils/validation';
 
 function ChangePasswordModal({ open, onClose }) {
   const [passwords, setPasswords] = useState({
