@@ -4,7 +4,7 @@ pipeline {
     environment {
         GCP_PROJECT_ID = 'devsecops-kel4'
         REGION = 'us-central1'
-        GCP_CREDENTIALS = 'gcp-service-account-key'
+        GCP_KEYFILE = 'gcp-service-account-key'
         SONAR_PROJECT_KEY = 'auragram-vulnerable'
     }
     
@@ -28,14 +28,16 @@ pipeline {
         stage('Deploy to Cloud Run') {
             steps {
                 withCredentials([
-                    file(credentialsId: "${GCP_CREDENTIALS}", variable: 'GCP_KEY'),
+                    file(credentialsId: "${GCP_KEYFILE}", variable: 'GCP_KEYFILE'),
                     string(credentialsId: 'MONGODB_URI', variable: 'MONGODB_URI'),
                     string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET'),
                     string(credentialsId: 'GCP_BUCKET', variable: 'GCP_BUCKET'),
+                    string(credentialsId: 'VULNER_API', variable: 'VULNER_API'),
+                    string(credentialsId: 'DEFAULT_PP', variable: 'DEFAULT_PP'),
                     string(credentialsId: 'GCP_SERVICE_ACCOUNT', variable: 'GCP_SERVICE_ACCOUNT')
                 ]) {
                     sh """
-                        gcloud auth activate-service-account --key-file=$GCP_KEY
+                        gcloud auth activate-service-account --key-file=$GCP_KEYFILE
                         gcloud auth configure-docker gcr.io -q
                         
                         # Build and Deploy Backend
@@ -45,7 +47,7 @@ pipeline {
                             --region ${REGION} \
                             --project ${GCP_PROJECT_ID} \
                             --allow-unauthenticated \
-                            --set-env-vars="MONGODB_URI=${MONGODB_URI},JWT_SECRET=${JWT_SECRET},GCP_PROJECT_ID=${GCP_PROJECT_ID},GCP_BUCKET=${GCP_BUCKET}" \
+                            --set-env-vars="MONGODB_URI=${MONGODB_URI},JWT_SECRET=${JWT_SECRET},GCP_PROJECT_ID=${GCP_PROJECT_ID},GCP_BUCKET=${GCP_BUCKET},GCP_KEYFILE=${GCP_KEYFILE}" \
                             --service-account=${GCP_SERVICE_ACCOUNT} \
                             --port=8080
                         
@@ -55,7 +57,8 @@ pipeline {
                             --platform managed \
                             --region ${REGION} \
                             --project ${GCP_PROJECT_ID} \
-                            --allow-unauthenticated
+                            --allow-unauthenticated \
+                            --set-env-vars="REACT_APP_API_URL=${VULNER_API},REACT_APP_DEFAULT_PP=${DEFAULT_PP}"
                     """
                 }
             }
