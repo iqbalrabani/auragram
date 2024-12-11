@@ -32,8 +32,6 @@ pipeline {
                     string(credentialsId: 'MONGODB_URI', variable: 'MONGODB_URI'),
                     string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET'),
                     string(credentialsId: 'GCP_BUCKET', variable: 'GCP_BUCKET'),
-                    string(credentialsId: 'VULNER_API', variable: 'VULNER_API'),
-                    string(credentialsId: 'DEFAULT_PP', variable: 'DEFAULT_PP'),
                     string(credentialsId: 'GCP_SERVICE_ACCOUNT', variable: 'GCP_SERVICE_ACCOUNT')
                 ]) {
                     sh """
@@ -57,8 +55,7 @@ pipeline {
                             --platform managed \
                             --region ${REGION} \
                             --project ${GCP_PROJECT_ID} \
-                            --allow-unauthenticated \
-                            --set-env-vars="REACT_APP_API_URL=${VULNER_API}, REACT_APP_DEFAULT_PP=${DEFAULT_PP}"
+                            --allow-unauthenticated
                     """
                 }
             }
