@@ -28,7 +28,7 @@ pipeline {
         stage('Deploy to Cloud Run') {
             steps {
                 withCredentials([
-                    file(credentialsId: "${GCP_KEYFILE}", variable: 'GCP_KEYFILE'),
+                    file(credentialsId: "${GCP_CREDENTIAL}", variable: 'GCP_CREDENTIAL'),
                     string(credentialsId: 'MONGODB_URI', variable: 'MONGODB_URI'),
                     string(credentialsId: 'JWT_SECRET', variable: 'JWT_SECRET'),
                     string(credentialsId: 'GCP_BUCKET', variable: 'GCP_BUCKET'),
