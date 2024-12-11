@@ -5,7 +5,7 @@ pipeline {
         GCP_PROJECT_ID = 'devsecops-kel4'
         REGION = 'us-central1'
         GCP_CREDENTIALS = 'gcp-service-account-key'
-        SONAR_PROJECT_KEY = 'auragram'
+        SONAR_PROJECT_KEY = 'auragram-vulnerable'
     }
     
     stages {
