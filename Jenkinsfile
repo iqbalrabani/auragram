@@ -4,7 +4,7 @@ pipeline {
     environment {
         GCP_PROJECT_ID = 'devsecops-kel4'
         REGION = 'us-central1'
-        GCP_KEYFILE = 'gcp-service-account-key'
+        GCP_CREDENTIAL = 'gcp-service-account-key'
         SONAR_PROJECT_KEY = 'auragram-vulnerable'
     }
     
@@ -34,10 +34,11 @@ pipeline {
                     string(credentialsId: 'GCP_BUCKET', variable: 'GCP_BUCKET'),
                     string(credentialsId: 'VULNER_API', variable: 'VULNER_API'),
                     string(credentialsId: 'DEFAULT_PP', variable: 'DEFAULT_PP'),
+                    string(credentialsId: 'GCP_KEYFILE', variable: 'GCP_KEYFILE'),
                     string(credentialsId: 'GCP_SERVICE_ACCOUNT', variable: 'GCP_SERVICE_ACCOUNT')
                 ]) {
                     sh """
-                        gcloud auth activate-service-account --key-file=$GCP_KEYFILE
+                        gcloud auth activate-service-account --key-file=$GCP_CREDENTIAL
                         gcloud auth configure-docker gcr.io -q
                         
                         # Build and Deploy Backend
