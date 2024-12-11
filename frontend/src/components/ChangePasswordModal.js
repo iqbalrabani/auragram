@@ -34,31 +34,17 @@ function ChangePasswordModal({ open, onClose }) {
     }));
   };
 
-  const validateForm = () => {
-    if (!passwords.currentPassword) {
-      setError('Current password is required');
-      return false;
-    }
-
-    const newPasswordErrors = validatePassword(passwords.newPassword);
-    if (newPasswordErrors.length > 0) {
-      setError(newPasswordErrors[0]);
-      return false;
-    }
-
-    if (passwords.newPassword !== passwords.confirmPassword) {
-      setError('New passwords do not match');
-      return false;
-    }
-
-    return true;
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    if (!validateForm()) {
+    if (!passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword) {
+      setError('All fields are required');
+      return;
+    }
+
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      setError('New passwords do not match');
       return;
     }
 
@@ -173,4 +159,4 @@ function ChangePasswordModal({ open, onClose }) {
   );
 }
 
-export default ChangePasswordModal; 
+export default ChangePasswordModal;
