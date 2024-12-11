@@ -14,7 +14,6 @@ import {
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import axios from 'axios';
-import { validatePassword, validateUsername } from '../utils/validation';
 import config from '../config';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 
@@ -54,8 +53,8 @@ function Register() {
 
   const validateForm = () => {
     const errors = {
-      username: validateUsername(formData.username),
-      password: validatePassword(formData.password),
+      username: formData.username ? [] : ['Username is required'],
+      password: formData.password ? [] : ['Password is required'],
       confirmPassword: formData.password !== formData.confirmPassword 
         ? ['Passwords do not match'] 
         : [],

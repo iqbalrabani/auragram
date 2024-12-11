@@ -1,5 +1,4 @@
 const router = require('express').Router();
-const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const multer = require('multer');
@@ -31,9 +30,6 @@ router.post('/register', upload.single('profilePhoto'), async (req, res) => {
       return res.status(400).json({ error: 'Username already exists' });
     }
 
-    // Store password in plain text - INSECURE!
-    const plainTextPassword = password;
-
     let profilePhotoUrl = getPublicUrl('profiles/default-profile.jpg');
 
     if (req.file) {
@@ -54,7 +50,7 @@ router.post('/register', upload.single('profilePhoto'), async (req, res) => {
     const user = new User({
       username,
       displayName,
-      password: plainTextPassword, // Store plain text password
+      password, // Store plain text password
       bio,
       profilePhoto: profilePhotoUrl
     });
@@ -78,9 +74,8 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'User not found' });
     }
 
-    // Verify password
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
+    // Compare plaintext password
+    if (user.password !== password) {
       return res.status(400).json({ error: 'Invalid password' });
     }
 
