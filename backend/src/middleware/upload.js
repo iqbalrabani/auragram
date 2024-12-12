@@ -15,9 +15,7 @@ const upload = multer({
 
 const uploadMiddleware = (req, res, next) => {
   upload.single('image')(req, res, (err) => {
-    if (err instanceof multer.MulterError) {
-      return res.status(400).json({ error: err.message });
-    } else if (err) {
+    if (err) {
       return res.status(400).json({ error: err.message });
     }
     next();
