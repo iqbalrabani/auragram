@@ -35,8 +35,10 @@ pipeline {
             steps {
                 script {
                     def qualityGate = waitForQualityGate()
-                    if (qualityGate.status != OK) {
+                    if (qualityGate.status != "OK") {
                         error "Pipeline error due to SonarQube quality status: ${qualityGate.status}"
+                    } else {
+                        echo "Quality Gate passed with status: ${qualityGate.status}"
                     }
                 }
             }
