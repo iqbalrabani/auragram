@@ -9,12 +9,6 @@ pipeline {
     }
     
     stages {
-        stage ('Checkout SCM'){
-            steps {
-                git branch : 'main', url: 'https://github.com/iqbalrabani/auragram.git'
-            }
-        }
-
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -68,7 +62,6 @@ pipeline {
                             --project ${GCP_PROJECT_ID} \
                             --set-env-vars="MONGODB_URI=${MONGODB_URI},JWT_SECRET=${JWT_SECRET},GCP_PROJECT_ID=${GCP_PROJECT_ID},GCP_BUCKET=${GCP_BUCKET},GCP_KEYFILE=${GCP_KEYFILE}" \
                             --service-account=${GCP_SERVICE_ACCOUNT} \
-                            --port=8080 \
                             --allow-unauthenticated
                         
                         # Build and Deploy Frontend
