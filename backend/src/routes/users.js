@@ -1,9 +1,7 @@
 const router = require('express').Router();
 const User = require('../models/User');
 const auth = require('../middleware/auth');
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 const { bucket, getPublicUrl } = require('../config/storage');
 const uploadMiddleware = require('../middleware/upload');
 const bcrypt = require('bcryptjs');
