@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import CreatePostModal from './CreatePostModal';
 import { useState, useEffect } from 'react';
-import config from '../config';
 
 function Layout({ children }) {
   const navigate = useNavigate();

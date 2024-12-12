@@ -2,30 +2,16 @@ const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const multer = require('multer');
 const path = require('path');
 const { bucket, getPublicUrl } = require('../config/storage');
 const rateLimiter = require('../services/rateLimiter');
-
-const storage = multer.diskStorage({
-  destination: 'uploads/profiles/',
-  filename: (req, file, cb) => {
-    cb(null, `profile-${Date.now()}${path.extname(file.originalname)}`);
-  }
-});
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024 // 5MB limit
-  }
-});
+const uploadMiddleware = require('../middleware/upload');
 
 // Register
-router.post('/register', upload.single('profilePhoto'), async (req, res) => {
+router.post('/register', uploadMiddleware, async (req, res) => {
   try {
     const { username, displayName, password, bio } = req.body;
-    
+
     // Check if user exists
     const existingUser = await User.findOne({ username });
     if (existingUser) {
@@ -82,7 +68,7 @@ router.post('/login', async (req, res) => {
         error: `Too many failed attempts from your IP. Please try again in ${timeLeft} minutes.`
       });
     }
-    
+
     // Find user
     const user = await User.findOne({ username });
     if (!user) {
@@ -94,7 +80,7 @@ router.post('/login', async (req, res) => {
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       const attemptsLeft = rateLimiter.recordFailedAttempt(ip);
-      
+
       if (attemptsLeft <= 0) {
         return res.status(423).json({
           error: 'Too many failed attempts. Your IP has been temporarily blocked.'
