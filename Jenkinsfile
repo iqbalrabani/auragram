@@ -47,10 +47,10 @@ pipeline {
                             --platform managed \
                             --region ${REGION} \
                             --project ${GCP_PROJECT_ID} \
-                            --allow-unauthenticated \
                             --set-env-vars="MONGODB_URI=${MONGODB_URI},JWT_SECRET=${JWT_SECRET},GCP_PROJECT_ID=${GCP_PROJECT_ID},GCP_BUCKET=${GCP_BUCKET},GCP_KEYFILE=${GCP_KEYFILE}" \
                             --service-account=${GCP_SERVICE_ACCOUNT} \
-                            --port=8080
+                            --port=8080 \
+                            --allow-unauthenticated
                         
                         # Build and Deploy Frontend
                         gcloud run deploy auragram \
@@ -58,8 +58,8 @@ pipeline {
                             --platform managed \
                             --region ${REGION} \
                             --project ${GCP_PROJECT_ID} \
-                            --allow-unauthenticated \
                             --set-env-vars="REACT_APP_API_URL=${SECURE_API},REACT_APP_DEFAULT_PP=${DEFAULT_PP}"
+                            --allow-unauthenticated
                     """
                 }
             }
