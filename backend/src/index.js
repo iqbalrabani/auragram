@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
+const helmet = require('helmet');
 const userRoutes = require('./routes/users');
 
 const app = express();
@@ -11,6 +12,20 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
+
+// Tambahkan Helmet untuk header keamanan default
+app.use(helmet());
+
+// Header tambahan untuk keamanan spesifik
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy", "default-src 'self'; script-src 'self' https://trusted-cdn.com;");
+  res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  res.setHeader("X-Frame-Options", "SAMEORIGIN");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  next();
+});
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI, {
