@@ -2,7 +2,6 @@ const router = require('express').Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const path = require('path');
 const { bucket, getPublicUrl } = require('../config/storage');
 const rateLimiter = require('../services/rateLimiter');
 const uploadMiddleware = require('../middleware/upload');

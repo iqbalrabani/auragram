@@ -2,9 +2,7 @@ const router = require('express').Router();
 const Post = require('../models/Post');
 const Comment = require('../models/Comment');
 const auth = require('../middleware/auth');
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 const { bucket, getPublicUrl } = require('../config/storage');
 const uploadMiddleware = require('../middleware/upload');
 
