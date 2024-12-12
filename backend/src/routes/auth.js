@@ -51,7 +51,8 @@ router.post('/register', uploadMiddleware, async (req, res) => {
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     res.status(201).json({ token, user: { ...user._doc, password: undefined } });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Registration error:', error);
+    res.status(500).json({ error: 'Failed to register user' });
   }
 });
 

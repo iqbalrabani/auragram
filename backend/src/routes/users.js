@@ -108,12 +108,8 @@ router.put('/update', auth, uploadMiddleware, async (req, res) => {
     const savedUser = await user.save();
     res.json({ ...savedUser._doc, password: undefined });
   } catch (error) {
-    // Mongoose duplicate key error
-    if (error.code === 11000) {
-      return res.status(400).json({ error: 'Username already exists' });
-    }
-    console.error('Route error:', error);
-    res.status(500).json({ error: 'Failed to update profile' });
+    console.error('Update user error:', error);
+    res.status(500).json({ error: 'Failed to update user profile' });
   }
 });
 
