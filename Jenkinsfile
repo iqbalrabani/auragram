@@ -9,6 +9,12 @@ pipeline {
     }
     
     stages {
+        stage ('Checkout SCM'){
+            steps {
+                git branch : 'main', url: 'https://github.com/iqbalrabani/auragram.git'
+            }
+        }
+
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -24,8 +30,19 @@ pipeline {
                 }
             }
         }
+
+        stage ('Quality Gate') {
+            steps {
+                script {
+                    def qualityGate = waitForQualityGate()
+                    if (qualityGate.status ≠ OK) {
+                        error "Pipeline error due to SonarQube quality status: ${qualityGate.status}"
+                    }
+                }
+            }
+        }
         
-        stage('Deploy to Cloud Run') {
+        stage(' Build and Deploy to Cloud Run') {
             steps {
                 withCredentials([
                     file(credentialsId: "${GCP_CREDENTIAL}", variable: 'GCP_CREDENTIAL'),
