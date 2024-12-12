@@ -77,7 +77,7 @@ pipeline {
                             --platform managed \
                             --region ${REGION} \
                             --project ${GCP_PROJECT_ID} \
-                            --set-env-vars="REACT_APP_API_URL=${SECURE_API},REACT_APP_DEFAULT_PP=${DEFAULT_PP}"
+                            --set-env-vars="REACT_APP_API_URL=${SECURE_API},REACT_APP_DEFAULT_PP=${DEFAULT_PP}" \
                             --allow-unauthenticated
                     """
                 }
