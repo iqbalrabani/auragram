@@ -1,7 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
 const userRoutes = require('./routes/users');
+const errorHandler = require('./middleware/errorHandler');
 require('dotenv').config();
 
 const app = express();
@@ -28,6 +30,9 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/posts', require('./routes/posts'));
 app.use('/api/comments', require('./routes/comments'));
 app.use('/api/users', userRoutes);
+
+// Error Handler Middleware
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, '0.0.0.0', () => {
