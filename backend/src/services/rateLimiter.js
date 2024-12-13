@@ -13,7 +13,7 @@ const rateLimiter = {
     const attempt = loginAttempts.get(ip);
     if (!attempt) return false;
 
-    // Check if lock time has expired
+    // Check if lock time has expire
     if (attempt.lockUntil && attempt.lockUntil > Date.now()) {
       return true;
     }
